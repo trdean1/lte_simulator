@@ -1,0 +1,31 @@
+\documentclass[tikz,border=3mm]{standalone}
+\usepackage{amsmath,amsfonts,amssymb,amsthm}
+\usepackage{float,graphicx}
+\usepackage{bbm}
+\usepackage{xcolor}
+\usepackage{pgfplots}
+\usepackage{ifthen}
+\usetikzlibrary{arrows}
+
+\begin{document}
+\begin{tikzpicture}
+[point/.style={circle,draw=red!50,fill=red!20,thick,
+inner sep=0pt,minimum size=0.75mm}]
+
+\filldraw[fill=none, draw=blue, dashed] (0,0) rectangle (4,4);
+
+\foreach \x in {-1,-0.9,...,1.1}
+{
+	\foreach \y in {-1,-0.9,...,1.1}
+    {
+    \pgfmathparse{rnd < 0.04 ? int(1) : int(0)}
+    \ifnum\pgfmathresult=1 
+    	\node at (4*\x, 4*\y) [point] {};
+    \else
+       
+    \fi	
+    }
+}
+
+\end{tikzpicture}
+\end{document}

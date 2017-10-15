@@ -11,8 +11,12 @@
 class map {
 	public:
 		//map( );
-		map( double, double, uint32_t );						   //Generates static map
-		map( double, double, uint32_t, uint32_t, double, double ); //Generates mobile map
+		map( double, double, uint32_t,
+		  	 uint32_t n_bs_antenna, double theta, 
+		  	 double spacing);						   //Generates static map
+		map( double, double, uint32_t, uint32_t, double, double,
+		     uint32_t n_bs_antenna, double theta, 
+		     double spacing ); //Generates mobile map
 
 		void add_ue( user_equipment );
 		void add_ue( double, double, double, double );

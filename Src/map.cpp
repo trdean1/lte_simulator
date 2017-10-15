@@ -1,8 +1,9 @@
 #include "map.h"
 
 //Generate static map
-map::map( double x, double y, uint32_t n_ue)
- 	: bs( x / 2.0, y / 2.0 )	
+map::map( double x, double y, uint32_t n_ue,
+		  uint32_t n_bs_antenna, double theta, double spacing)
+ 	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )	
 {
 	for( int i = 0; i < n_ue; i++ ) {
 		//Place UE at random
@@ -16,8 +17,9 @@ map::map( double x, double y, uint32_t n_ue)
 }
 
 map::map( double x, double y, uint32_t n_ue, 
-		  uint32_t n_paths, double v_mu, double v_sigma )
-	: bs( x / 2.0, y / 2.0 )
+		  uint32_t n_paths, double v_mu, double v_sigma,
+	      uint32_t n_bs_antenna, double theta, double spacing )
+	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )
 {
 	std::uniform_int_distribution<int> randint (0, n_paths - 1);
 

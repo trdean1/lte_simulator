@@ -48,6 +48,10 @@ class channel {
 		double ASD; 
 		double last_ASD;
 
+		//These are correlated, N(0,1) random variables used to generate our 
+		//coefficients
+		double kn, dsn, asan, asdn, sfn;
+
 		std::default_random_engine generator;
   		std::uniform_real_distribution<double> randu;
 		std::normal_distribution<double> randn;

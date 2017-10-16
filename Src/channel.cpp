@@ -31,6 +31,9 @@ channel::update()
 	distance = ue->get_distance( bs );
 	determine_LoS();
 	clusters = LoS ? 12 : 20;
+	
+	cross_correlate();
+
 	compute_pathloss();
 	compute_shadowfading();
 	compute_K();
@@ -38,7 +41,6 @@ channel::update()
 	compute_ASD();
 	compute_ASA();
 
-	//cross_correlate();
 }
 
 //Determine whether or not the link is LoS based on Table 7.4.2-1
@@ -98,14 +100,14 @@ channel::compute_shadowfading()
 	last_shadow = shadow_dB;
 
 	double sigma = LoS ? 4.0 : 6.0;
-	shadow_dB = sigma * randn( generator );
+	shadow_dB = sigma * sfn;
 }
 
 void
 channel::compute_K()
 {
 	last_K = K;
-	K = 9.0 + 3.5 * randn( generator );
+	K = 9.0 + 3.5 * kn;
 }
 
 void
@@ -126,7 +128,7 @@ channel::compute_DS()
 		sigma = 0.39;
 	}
 
-	double ds_log = mu + sigma * randn( generator );
+	double ds_log = mu + sigma * dsn;
 	
 	last_DS = DS;
 	DS = pow( 10.0, ds_log );
@@ -150,7 +152,7 @@ channel::compute_ASD()
 		sigma = 0.28;
 	}
 
-	double asd_log = mu + sigma * randn( generator );
+	double asd_log = mu + sigma * asdn;
 	
 	last_ASD = ASD;
 	ASD = pow( 10.0, asd_log );
@@ -178,7 +180,7 @@ channel::compute_ASA()
 		sigma = 0.11;
 	}
 
-	double asa_log = mu + sigma * randn( generator );
+	double asa_log = mu + sigma * asan;
 	
 	last_ASA = ASA;
 	ASA = pow( 10.0, asa_log );
@@ -192,13 +194,19 @@ channel::compute_ASA()
 void
 channel::cross_correlate()
 {
+	kn = randn( generator );
+	dsn = randn( generator );
+	asan = randn( generator );
+	asdn = randn( generator );
+	sfn = randn( generator );
+
 	if( LoS ) {
-   		DS = 0.4000*ASD+0.8000*ASA+0.4472*DS;
-   		shadow_dB = -0.5000*ASD-0.5000*ASA+0.4472*DS+0.5477*shadow_dB;
-        K = -0.2000*ASA-0.5367*DS+0.2556*shadow_dB+0.7789*K;
+   		dsn = 0.4000*asdn+0.8000*asan+0.4472*dsn;
+   		sfn = -0.5000*asdn-0.5000*asan+0.4472*dsn+0.5477*sfn;
+        kn = -0.2000*asan-0.5367*dsn+0.2556*sfn+0.7789*kn;
 	} else {
-    	ASA = 0.4000*ASD + 0.9165*ASA;
-    	DS = 0.4000*ASD + 0.4801*ASA + 0.7807*DS;
-    	shadow_dB = -0.5000*ASA + 0.2182*ASA - 0.3904*DS + 0.7416*shadow_dB;
+    	asan = 0.4000*asdn + 0.9165*asan;
+    	dsn = 0.4000*asdn + 0.4801*asan + 0.7807*dsn;
+    	sfn = -0.5000*asdn + 0.2182*asan - 0.3904*dsn + 0.7416*sfn;
 	}
 }

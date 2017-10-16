@@ -1,4 +1,8 @@
+#pragma once
+
 struct params {
+	double f_c;
+
 	double x_max;
 	double y_max;
 

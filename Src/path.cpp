@@ -6,6 +6,8 @@
  */
 path::path( double x_max, double y_max, double min_len ) 
 {
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	generator.seed( seed );
 	double max_len = sqrt( x_max*x_max + y_max*y_max );
 	while( true ) {
 		theta = 2*M_PI*randu( generator );

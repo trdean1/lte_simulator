@@ -5,6 +5,8 @@ map::map( double x, double y, uint32_t n_ue,
 		  uint32_t n_bs_antenna, double theta, double spacing)
  	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )	
 {
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	generator.seed( seed );
 	for( int i = 0; i < n_ue; i++ ) {
 		//Place UE at random
 		double xr =x*randu(generator);
@@ -21,6 +23,8 @@ map::map( double x, double y, uint32_t n_ue,
 	      uint32_t n_bs_antenna, double theta, double spacing )
 	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )
 {
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	generator.seed( seed );
 	std::uniform_int_distribution<int> randint (0, n_paths - 1);
 
 	//Generate n paths along which UEs will be placed

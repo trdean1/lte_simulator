@@ -1,3 +1,5 @@
+#include <cmath>
+
 #pragma once
 
 class node {
@@ -6,6 +8,8 @@ class node {
 		double get_y () { return y_location; }
 		double get_x_dot () { return x_velocity; }
 		double get_y_dot () { return y_velocity; }
+
+		double get_distance( node* n );
 
 	protected:
 		double x_location;

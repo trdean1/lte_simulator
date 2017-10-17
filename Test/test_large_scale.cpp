@@ -48,7 +48,7 @@ int main()
 	std::vector<user_equipment> ues = m.get_ue_list();
 	for( int i = 0; i < n_ue; i++ ) {
 		channel c ( &ues[i], &bs, &sysp );
-		c.update();
+		c.update_lsp_local();
 		print_parameters( stdout, c, i == 0 );
 	}
 }

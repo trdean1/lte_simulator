@@ -7,6 +7,9 @@ channel::channel( node* m_ue, node* m_bs, params* m_sysp )
 	ue = m_ue;
 	bs = m_bs;
 
+	base_station* tbs = static_cast<base_station*>( bs );
+	n_bs_elements = tbs->n_elements();
+
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	generator.seed( seed );
 	distance = ue->get_distance( bs );
@@ -25,10 +28,14 @@ channel::channel( node* m_ue, node* m_bs, params* m_sysp )
 	clusters = LoS ? 12 : 20;
 }
 
+//Generates large-scale parameters.  These parameters have the proper
+//cross-correlations but are not spatially consistent
 void
-channel::update() 
+channel::update_lsp_local() 
 {
 	distance = ue->get_distance( bs );
+	los_aoa = degtorad * ue->get_los_aoa( bs );
+	los_aod = degtorad * ue->get_los_aod( bs );
 	determine_LoS();
 	clusters = LoS ? 12 : 20;
 	
@@ -40,7 +47,17 @@ channel::update()
 	compute_DS();
 	compute_ASD();
 	compute_ASA();
+}
 
+void
+channel::update_ssp()
+{
+	compute_delays();
+	compute_cluster_powers();
+	compute_aod();
+	compute_aoa();
+	generate_phases();
+	compute_cluster_doppler();
 }
 
 //Determine whether or not the link is LoS based on Table 7.4.2-1
@@ -145,7 +162,7 @@ channel::compute_ASD()
 		f_c_GHz = 6.0;
 
 	if( LoS ) {
-		mu = 1.06 - 0.1114 * log10( f_c_GHz );
+		mu = 1.06 + 0.1114 * log10( f_c_GHz );
 		sigma = 0.28; 
 	} else {
 		mu = 1.5 - 0.1144 * log10( f_c_GHz );
@@ -210,3 +227,198 @@ channel::cross_correlate()
     	sfn = -0.5000*asdn + 0.2182*asan - 0.3904*dsn + 0.7416*sfn;
 	}
 }
+
+void
+channel::compute_delays()
+{
+	delays.clear();
+
+	double r_tau = LoS ? 2.3 : 2.5;
+	for( int i = 0; i < clusters; i++ ) {
+		delays.push_back( -1.0 * r_tau * DS * log( randu(generator) ) );
+	}
+
+	std::sort( delays.begin(), delays.end() );
+
+	//Normalize so smallest delay is zero
+	for( int i = clusters - 1; i >= 0; i-- ) {
+		delays[i] -= delays[0];
+	}
+
+	//Generate scaled delays for LoS case
+	if( LoS ) {
+		double c_tau = 0.7705 - 0.0433*K + 0.0002*K*K + 0.000017*K*K*K;
+		scaled_delays = delays;
+		for( int i = 0; i < clusters; i++ ) {
+			scaled_delays[i] /= c_tau;
+		}
+	}
+}
+
+void
+channel::compute_cluster_powers()
+{
+	cluster_powers.clear();
+
+	double r_tau = LoS ? 2.3 : 2.5;
+
+	double sum = 0;
+	for( int i = 0; i < clusters; i++ ) {
+		double Z_n = 3.0 * randn( generator );
+		double power =  
+			exp( -1.0 * delays[i] * ( r_tau - 1 ) / ( r_tau * DS ) )
+			* pow( 10.0, Z_n / -10.0 );
+		sum += power;
+		cluster_powers.push_back( power );
+	}
+
+	//Normalize to one
+	for( int i = 0; i < clusters; i++ ) 
+		cluster_powers[i] /= sum;
+
+	max_power = *std::max_element( cluster_powers.begin(), cluster_powers.end() );
+
+	//Largest cluster gets rescaled for LoS case, but this is only used 
+	//in angle generation
+	if( LoS ) {
+		double new_sum = sum;
+	   	new_sum -= cluster_powers[0];
+		scaled_cluster_powers.clear();
+		scaled_cluster_powers.push_back( K / (K + 1) );
+
+		for( int i = 1; i < clusters; i++ ) {
+			scaled_cluster_powers.push_back( 
+				(1.0 / (K + 1)) * cluster_powers[i] * sum / new_sum );
+		}
+
+		max_power = scaled_cluster_powers[0];
+	}
+
+
+}
+
+void
+channel::compute_aod()
+{
+	double c_phi;
+	double phi_tick;
+	double c_asd;
+
+	aod.clear();
+
+	std::vector<double> cluster_aod;
+
+	for( int i = 0; i < clusters; i++ ) {
+		int X_n = 2*round( randu( generator ) ) - 1;
+		double Y_n = ASD * randn( generator ) / 7.0;
+
+		if( LoS ) {
+			c_asd = 5;
+			c_phi = 1.146 * ( 1.1035 - 0.028 * K - 0.002 * K * K + 0.0001 * K * K * K );
+			phi_tick = 2 * ASD * sqrt( -1.0 * log( scaled_cluster_powers[i] / max_power ) )  
+					 / ( 1.4 * c_phi );
+
+			if( i == 0 )
+				cluster_aod.push_back( los_aod );
+			else
+				cluster_aod.push_back( X_n * phi_tick + Y_n + los_aod );
+
+		} else {
+			c_asd = 2;
+			c_phi = 1.289;
+			phi_tick = 2 * ASD * sqrt( -1.0 * log( cluster_powers[i] / max_power ) )  
+					 / ( 1.4 * c_phi );
+
+			cluster_aod.push_back( X_n * phi_tick + Y_n + los_aod );
+		}
+
+		std::vector<double> ray_aod;
+		for( int j = 0; j < rays; j++ ) {
+			ray_aod.push_back( cluster_aod[i] + c_asd * ray_basis[j] );
+		}
+
+		aod.push_back( ray_aod );
+	}
+}
+
+void
+channel::compute_aoa()
+{
+	double c_phi;
+	double phi_tick;
+	double c_asa;
+
+	aoa.clear();
+
+	std::vector<double> cluster_aoa;
+
+	for( int i = 0; i < clusters; i++ ) {
+		int X_n = 2*round( randu( generator ) ) - 1;
+		double Y_n = ASD * randn( generator ) / 7.0;
+		if( LoS ) {
+			c_asa = 5;
+			c_phi = 1.146 * ( 1.1035 - 0.028 * K - 0.002 * K * K + 0.0001 * K * K * K );
+			phi_tick = 2 * ASA * sqrt( -1.0 * log( scaled_cluster_powers[i] / max_power ) )  
+					 / ( 1.4 * c_phi );
+
+			if( i == 0 )
+				cluster_aoa.push_back( los_aoa );
+			else
+				cluster_aoa.push_back( X_n * phi_tick + Y_n + los_aoa );
+
+		} else {
+			c_asa = 2;
+			c_phi = 1.289;
+			phi_tick = 2 * ASA * sqrt( -1.0 * log( cluster_powers[i] / max_power ) )  
+					 / ( 1.4 * c_phi );
+
+			cluster_aoa.push_back( X_n * phi_tick + Y_n + los_aoa );
+		}
+
+		std::vector<double> ray_aoa;
+		for( int j = 0; j < rays; j++ ) {
+			ray_aoa.push_back( cluster_aoa[i] + c_asa * ray_basis[j] );
+		}
+
+		aoa.push_back( ray_aoa );
+	}
+}
+
+void
+channel::generate_phases()
+{
+	phases.clear();
+
+	for( int i = 0; i < clusters; i++ ) {
+		std::vector<double> tmp;
+		for( int j = 0; j < rays; j++ ) {
+			tmp.push_back( 2*M_PI*randu( generator ) );
+		}
+		phases.push_back( tmp );
+	}
+}
+
+void 
+channel::compute_cluster_doppler()
+{
+	for( int i = 0; i < clusters; i++ ) {
+		cluster_velocity.push_back( sysp->v_cluster_sigma * randn( generator ) ); 
+	}
+}
+
+std::pair<int,int>
+channel::get_two_strongest_clusters()
+{
+	std::vector<double> cp_copy = cluster_powers;
+	std::sort( cp_copy.begin(), cp_copy.end() );
+
+	std::pair<int,int> result;
+	for( int i = 0; i < cluster_powers.size(); i++ ) {
+		if( cluster_powers[i] == cp_copy[0] )
+			result.first = i;
+		if( cluster_powers[i] == cp_copy[1] )
+			result.second = i;
+	}
+
+	return result;
+}	

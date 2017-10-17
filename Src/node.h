@@ -10,6 +10,8 @@ class node {
 		double get_y_dot () { return y_velocity; }
 
 		double get_distance( node* n );
+		double get_los_aoa( node* n );
+		double get_los_aod( node* n );
 
 	protected:
 		double x_location;

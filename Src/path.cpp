@@ -10,34 +10,64 @@ path::path( double x_max, double y_max, double min_len )
 	generator.seed( seed );
 	double max_len = sqrt( x_max*x_max + y_max*y_max );
 	while( true ) {
-		theta = 2*M_PI*randu( generator );
-		double y_int_max = x_max * tan( theta );
-		y_intercept = y_int_max * randu( generator );
+		theta = M_PI*randu( generator );
+		m = tan( theta );
+		double y_int_max;
+		if( theta < M_PI / 2 ) {
+			y_int_max = 200 + x_max * m;
+			y_intercept = y_int_max * randu( generator ) - x_max * m;
+		} else {
+			y_int_max = -1.0 * x_max * m;
+			y_intercept = y_int_max * randu( generator );
+		}
 		
 		//find length of line segment in box
-		m = atan( theta );
-		double x_int = -1*y_intercept / m;
-		double x_max_int = m * x_max + y_intercept;
+		double x_intercept = -1*y_intercept / m;
+		//double x_max_int = m * x_max + y_intercept;
 
 		//Find the lowest values of x and y in the box
 		if( y_intercept > 0 && y_intercept < y_max ) {
+			//In this case x=0 is in the box
 			x_start = 0;
 			y_start = y_intercept;	
-		} else if (y_intercept < 0 ) {
-			x_start = x_int;
-			y_start = 0;
-		} else {
-			x_start = m*x_max_int + y_intercept;
-			y_start = m*x_max + y_intercept;
-		}
 
-		//Find the largest values of x and y in the box
-		if( m*x_max_int + y_intercept > y_max ) {
-			x_stop = x_max;
-			y_stop = m*x_max + y_intercept;
+			if( m*x_max + y_intercept > y_max ) {
+				y_stop = y_max;
+				x_stop = (y_max - y_intercept) / m;
+			} else if( m*x_max + y_intercept < 0 ) {
+				y_start = 0;
+				y_stop = y_intercept;
+				x_stop = x_intercept;
+			} else {
+				x_stop = x_max;
+				y_stop = m*x_max + y_intercept;
+			}
+		} else if (y_intercept < 0 ) {
+			//in this case, x=0 is below the box, but we are 
+			//guaranteed that y=0 is in the box
+			x_start = x_intercept;
+			y_start = 0;
+
+			if( m*x_max + y_intercept > y_max ) {
+				y_stop = y_max;
+				x_stop = (y_max - y_intercept) / m;
+			} else {
+				x_stop = x_max;
+				y_stop = m*x_max + y_intercept;
+			}
 		} else {
-			x_stop = m*x_max_int + y_intercept;
+			//in this case x=0 is above the box.  we know that
+			//y=y_max is in the box
 			y_stop = y_max;
+			x_start = (y_stop - y_intercept) / m;
+
+			if( m*x_max + y_intercept > 0 ) {
+				x_stop = x_max;
+				y_start = m*x_max + y_intercept;
+			} else {
+				y_start = 0;
+				x_stop = x_intercept;
+			}
 		}
 
 		seg_length = sqrt( pow(x_stop - x_start, 2) + pow(y_stop - y_start,2) );

@@ -27,8 +27,8 @@ int main()
 {
 	//base_station bs (100, 100, 4, 0, 0.1);
 	//user_equipment ue (30, 30, 0, 0);
-	int n_ue = 500;
-	map m (500, 500, n_ue, 4, 0, 0.1);
+	int n_ue = 2;
+	map m (500, 500, n_ue, 1, 50, 5, 4, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
@@ -46,9 +46,17 @@ int main()
 
 	base_station* bs = m.get_bs();
 	std::vector<user_equipment*> ues = m.get_ue_list();
+	std::vector<channel> channels;	
 	for( int i = 0; i < n_ue; i++ ) {
-		channel c ( ues[i], bs, &sysp );
-		c.update_lsp_local();
-		print_parameters( stdout, c, i == 0 );
+		channels.emplace_back( ues[i], bs, &sysp );
+	}
+
+	for( double t = 0; t < 1000.0; t += 100 ) {
+		for( int i = 0; i < n_ue; i++ ) {
+			m.update_locations(100);
+			channels[i].update_lsp_local(100);
+			print_parameters( stdout, channels[i], i == 0 );
+		}
+		printf("---------------------------------------------\n");
 	}
 }

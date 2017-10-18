@@ -1,9 +1,11 @@
 add_executable (test_deployment test_deployment.cpp)
 add_executable (test_large_scale test_large_scale.cpp)
+add_executable (test_correlation test_correlation.cpp)
 add_executable (test_small_scale test_small_scale.cpp)
 add_executable (test_tf_coefficients test_tf_coefficients.cpp)
 
 target_link_libraries (test_deployment LINK_PUBLIC Src)
 target_link_libraries (test_large_scale LINK_PUBLIC Src)
+target_link_libraries (test_correlation LINK_PUBLIC Src)
 target_link_libraries (test_small_scale LINK_PUBLIC Src)
 target_link_libraries (test_tf_coefficients LINK_PUBLIC Src)

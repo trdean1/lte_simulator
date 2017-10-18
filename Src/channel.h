@@ -11,7 +11,6 @@
 #define _USE_MATH_DEFINES
 
 struct lsp {
-	double pathloss;
 	double shadow;
 	double K;
 	double DS;
@@ -23,7 +22,7 @@ class channel {
 	public:
 		channel( node*, node*, params* sysp );
 
-		void update_lsp_local();
+		void update_lsp_local( double t = 0 );
 		void update_ssp();
 
 		bool is_LoS() { return LoS; }
@@ -57,6 +56,7 @@ class channel {
 		params* sysp;
 
 		double distance;
+		double distance_traveled;
 		double los_aoa;
 		double los_aod;
 

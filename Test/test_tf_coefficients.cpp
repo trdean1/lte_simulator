@@ -56,10 +56,10 @@ int main()
 	sysp.v_sigma = 0;
 	sysp.v_cluster_sigma = 0;
 
-	base_station bs = m.get_bs();
-	std::vector<user_equipment> ues = m.get_ue_list();
+	base_station* bs = m.get_bs();
+	std::vector<user_equipment*> ues = m.get_ue_list();
 	for( int i = 0; i < n_ue; i++ ) {
-		tf_channel c ( &ues[i], &bs, &sysp );
+		tf_channel c ( ues[i], bs, &sysp );
 		c.update_lsp_local();
 		c.update_ssp();
 		c.compute_impulse_response( 0 );

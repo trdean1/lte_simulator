@@ -16,11 +16,11 @@ channel::channel( node* m_ue, node* m_bs, params* m_sysp )
 
 	determine_LoS();
 
-	last_shadow = NAN;
-	last_K = NAN;
-	last_DS = NAN;
-	last_ASA = NAN;
-	last_ASD = NAN;
+	shadow_dB = NAN;
+	K = NAN;
+	DS = NAN;
+	ASA = NAN;
+	ASD = NAN;
 
 	sysp = m_sysp;
 
@@ -70,9 +70,13 @@ channel::set_current_lsp( lsp new_lsp )
 //Generates large-scale parameters.  These parameters have the proper
 //cross-correlations but are not spatially consistent
 void
-channel::update_lsp_local() 
+channel::update_lsp_local( double t ) 
 {
 	distance = ue->get_distance( bs );
+
+	distance_traveled = sqrt(ue->get_x_dot()*ue->get_x_dot() 
+					       + ue->get_y_dot()*ue->get_y_dot()) * t / 1000.0;
+
 	los_aoa = degtorad * ue->get_los_aoa( bs );
 	los_aod = degtorad * ue->get_los_aod( bs );
 	determine_LoS();
@@ -157,6 +161,12 @@ channel::compute_shadowfading()
 
 	double sigma = LoS ? 4.0 : 6.0;
 	shadow_dB = sigma * sfn;
+
+	if( !std::isnan( last_shadow ) ) {
+		double correlation_distance = LoS ? 10.0 : 6.0;
+		double corr_coef = sqrt( exp( -1.0 * fabs(distance_traveled) / correlation_distance ) );
+		shadow_dB = (1 - corr_coef) * shadow_dB + corr_coef * last_shadow;
+	}
 }
 
 void
@@ -164,6 +174,12 @@ channel::compute_K()
 {
 	last_K = K;
 	K = 9.0 + 3.5 * kn;
+
+	if( !std::isnan( last_K ) ) {
+		double correlation_distance = 4.0;
+		double corr_coef = sqrt( exp( -1.0 * distance_traveled / correlation_distance ) );
+		K = (1 - corr_coef) * K + corr_coef * last_K;
+	}
 }
 
 void
@@ -188,6 +204,12 @@ channel::compute_DS()
 	
 	last_DS = DS;
 	DS = pow( 10.0, ds_log );
+
+	if( !std::isnan( last_DS ) ) {
+		double correlation_distance = LoS ? 8.0 : 5.0;
+		double corr_coef = sqrt( exp( -1.0 * distance_traveled / correlation_distance ) );
+		DS = (1 - corr_coef) * DS + corr_coef * last_DS;
+	}
 }
 
 void
@@ -215,6 +237,12 @@ channel::compute_ASD()
 
 	if ( ASD > 104.0 ) 
 		ASD = 104.0;
+
+	if( !std::isnan( last_ASD ) ) {
+		double correlation_distance = LoS ? 7.0 : 3.0;
+		double corr_coef = sqrt( exp( -1.0 * distance_traveled / correlation_distance ) );
+		ASD = (1 - corr_coef) * ASD + corr_coef * last_ASD;
+	}
 }
 
 
@@ -243,6 +271,12 @@ channel::compute_ASA()
 
 	if( ASA > 104.0 )
 		ASA = 104.0;
+
+	if( !std::isnan( last_ASA ) ) {
+		double correlation_distance = LoS ? 5.0 : 3.0;
+		double corr_coef = sqrt( exp( -1.0 * distance_traveled / correlation_distance ) );
+		ASA = (1 - corr_coef) * ASA + corr_coef * last_ASA;
+	}
 }
 
 //This is a matrix multiplication based on the cholesky factor of the 

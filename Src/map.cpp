@@ -62,6 +62,16 @@ map::set_bs( base_station m_bs ) {
 	bs = m_bs;
 }
 
+std::vector<user_equipment*>
+map::get_ue_list()
+{
+	std::vector<user_equipment*> out;
+	for( int i = 0; i < ue_list.size(); i++ ) {
+		out.push_back( &ue_list[i] );
+	}
+	return out;
+}
+
 void 
 map::update_locations( double time_ms )
 {
@@ -76,7 +86,11 @@ map::update_locations( double time_ms )
 		//side.
 		if( ue_list[i].get_x() > x_dim || ue_list[i].get_x() < 0 ||
 			ue_list[i].get_y() > y_dim || ue_list[i].get_y() < 0 ) {
-			std::pair<double,double> p_0 = paths[ path_map[i] ].get_point_from_param( 0 );
+			//This is a really lazy way to get to the correct side of the map.
+			//If we pick the wrong side, then we'll end up here next iteration
+			//and we can just hope we randomly end up on the other side.
+			double p = round( randu( generator ) );
+			std::pair<double,double> p_0 = paths[ path_map[i] ].get_point_from_param( p );
 			ue_list[i].set_location( p_0.first, p_0.second );
 		}
 	}

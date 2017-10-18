@@ -27,8 +27,8 @@ class map {
 
 		void print_locations();
 
-		std::vector<user_equipment>& get_ue_list( ) { return ue_list; }
-		base_station& get_bs() { return bs; }
+		std::vector<user_equipment*> get_ue_list( );
+		base_station* get_bs() { return &bs; }
 
 	private:
 		std::vector<user_equipment> ue_list;

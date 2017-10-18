@@ -98,10 +98,10 @@ int main()
 	sysp.v_sigma = 0;
 	sysp.v_cluster_sigma = 0;
 
-	base_station bs = m.get_bs();
-	std::vector<user_equipment> ues = m.get_ue_list();
+	base_station* bs = m.get_bs();
+	std::vector<user_equipment*> ues = m.get_ue_list();
 	for( int i = 0; i < n_ue; i++ ) {
-		channel c ( &ues[i], &bs, &sysp );
+		channel c ( ues[i], bs, &sysp );
 		c.update_lsp_local();
 		c.update_ssp();
 		//print_delays( stdout, c, i == 0 );

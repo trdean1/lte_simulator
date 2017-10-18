@@ -7,4 +7,6 @@ add_library (Src SHARED
 		channel.cpp
 		tf_channel.cpp)
 
+target_link_libraries(Src -larmadillo)
+
 target_include_directories (Src PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

@@ -18,6 +18,15 @@ void print_impulse_response( FILE* stream, tf_channel& c, int antenna_element )
 		fprintf( stream, "( %f + i * %f ) * delta( t - %e )\n", h[i].first.real, h[i].first.imag, h[i].second );
 }
 
+void print_coefficients( FILE* stream, arma::cx_vec v ) 
+{
+	for( auto it : v ) {
+		fprintf( stream, "%f + i * %f, ", it.real(), it.imag() ); 
+	}
+
+	fprintf( stream, "\n");
+}
+
 int main()
 {
 	//base_station bs (100, 100, 4, 0, 0.1);
@@ -54,13 +63,15 @@ int main()
 		c.update_lsp_local();
 		c.update_ssp();
 		c.compute_impulse_response( 0 );
+		arma::cx_vec h = c.compute_coefficients( 0 );
 		//print_delays( stdout, c, i == 0 );
 		//print_powers( stdout, c, i == 0 );
 		//print_aoa( stdout, c);
 		//print_aod( stdout, c );
-		for( int j = 0; j < n_elements; j++ ) {
-			printf("Element %d:\n", j);
-			print_impulse_response( stdout, c, j );
-		}
+		//for( int j = 0; j < n_elements; j++ ) {
+		//	printf("Element %d:\n", j);
+		//	print_impulse_response( stdout, c, j );
+		//}
+		print_coefficients( stdout, h );
 	}
 }

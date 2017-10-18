@@ -130,26 +130,54 @@ tf_channel::impulse_comp( impulse_pair a, impulse_pair b )
 	return a.second < b.second;
 }
 
-/*
-void
+/** Given channel impulse response, this function
+ * computes the gain coefficients per OFDM frequency bin
+ *
+ * First, we must sample the impulse response function, then
+ * we will take an FFT of this function and finally we will
+ * coherently sum over each OFDM frequency bin
+ */
+arma::cx_vec 
 tf_channel::compute_coefficients( int element_index )
 {
+	double T_s = 1 / sysp->samp_per_symb;
+	T_s /= sysp->f_N;
+	int FFT_size = sysp->N * sysp->samp_per_symb;
+
 	//Step 1: find impulse response in sampled domain
 	arma::cx_vec h = sample_impulse_response( element_index,
-											  sysp->
+											  T_s,
+											  sysp->impulse_width,
+											  FFT_size );
+
+	//Normalize
+	h = arma::normalise(h);
+
 	//Step 2: take fft
+	arma::cx_vec H = arma::fft( h );
 
 	//Step 3: coherently sum within each bin
-	
+	arma::cx_vec output( sysp->N );
+	output.zeros();
+
+	for( int i = 0; i < FFT_size; i += sysp->samp_per_symb ) {
+		for( int j = 0; j < sysp->samp_per_symb; j++ ) {
+			output[ i / sysp->samp_per_symb ] += H[i + j];
+		}
+	}
+
+	//Normalize again
+	output = arma::normalise( output );
+
+	return output;
 }
-*/
+
 /** Returns a length N vector that gives that channel impulse response
  * sampled of the channel at element_index at rate T_s, assuming that 
  * each delta function is actually a Gaussian with a half-width at half 
  * max of impulse_width samples.  
  *
  */
-/*
 arma::cx_vec
 tf_channel::sample_impulse_response( int element_index, double T_s, 
 				                     double impulse_width, double N )
@@ -161,7 +189,7 @@ tf_channel::sample_impulse_response( int element_index, double T_s,
 			impulse_response_per_element[impulse_width];
 
 	//Iterate over each arriving ray	
-	for( int i = 0; i < impulse_reponse.size(); i++ ) {
+	for( int i = 0; i < impulse_response.size(); i++ ) {
 		double tau = impulse_response[i].second;
 
 		//Each impulse is a very narrow Gaussian pulse
@@ -173,4 +201,3 @@ tf_channel::sample_impulse_response( int element_index, double T_s,
 
 	return output;
 }
-*/

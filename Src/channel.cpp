@@ -28,6 +28,45 @@ channel::channel( node* m_ue, node* m_bs, params* m_sysp )
 	clusters = LoS ? 12 : 20;
 }
 
+lsp
+channel::get_current_lsp() 
+{
+	lsp out;
+
+	out.shadow = shadow_dB;
+	out.K = K;
+	out.DS = DS;
+	out.ASA = ASA;
+	out.ASD = ASD;
+
+	return out;
+}
+
+lsp
+channel::get_last_lsp()
+{
+	lsp out;
+
+	out.shadow = last_shadow;
+	out.K = last_K;
+	out.DS = last_DS;
+	out.ASA = last_ASA;
+	out.ASD = last_ASD;
+
+	return out;
+}
+
+void
+channel::set_current_lsp( lsp new_lsp )
+{
+	shadow_dB = new_lsp.shadow;
+	K = new_lsp.K;
+	DS = new_lsp.DS;
+	ASA = new_lsp.ASA;
+	ASD = new_lsp.ASD;
+
+}
+
 //Generates large-scale parameters.  These parameters have the proper
 //cross-correlations but are not spatially consistent
 void
@@ -282,13 +321,14 @@ channel::compute_cluster_powers()
 	//in angle generation
 	if( LoS ) {
 		double new_sum = sum;
+		double K_lin = pow( 10.0, K / 10.0 );
 	   	new_sum -= cluster_powers[0];
 		scaled_cluster_powers.clear();
-		scaled_cluster_powers.push_back( K / (K + 1) );
+		scaled_cluster_powers.push_back( K_lin / (K_lin + 1) );
 
 		for( int i = 1; i < clusters; i++ ) {
 			scaled_cluster_powers.push_back( 
-				(1.0 / (K + 1)) * cluster_powers[i] * sum / new_sum );
+				(1.0 / (K_lin + 1)) * cluster_powers[i] * sum / new_sum );
 		}
 
 		max_power = scaled_cluster_powers[0];

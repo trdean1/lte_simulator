@@ -102,13 +102,14 @@ tf_channel::compute_impulse_response( double t )
 			}
 			/************* In the LoS case, we must rescale powers ***********/
 			if (LoS) {
+				double K_lin = pow(10.0, K / 10.0);
 				for( int ii = 0; ii < cluster_impulse.size(); ii++ ) {
 					if( j == 0 ) {
-						cluster_impulse[ii].first.real *= sqrt( rays * K / (1.0 * K) );
-						cluster_impulse[ii].first.imag *= sqrt( rays * K / (1.0 * K) );
+						cluster_impulse[ii].first.real *= sqrt( rays * K_lin / (1.0 + K_lin) );
+						cluster_impulse[ii].first.imag *= sqrt( rays * K / (1.0 + K_lin) );
 					} else {
-						cluster_impulse[ii].first.real *= sqrt( 1.0 / (1.0 * K) );
-						cluster_impulse[ii].first.imag *= sqrt( 1.0 / (1.0 * K) );
+						cluster_impulse[ii].first.real *= sqrt( 1.0 / (1.0 + K_lin) );
+						cluster_impulse[ii].first.imag *= sqrt( 1.0 / (1.0 + K_lin) );
 					}
 				}
 			}
@@ -186,15 +187,17 @@ tf_channel::sample_impulse_response( int element_index, double T_s,
 	output.zeros();
 
 	std::vector<impulse_pair> impulse_response = 
-			impulse_response_per_element[impulse_width];
+			impulse_response_per_element[element_index];
 
 	//Iterate over each arriving ray	
 	for( int i = 0; i < impulse_response.size(); i++ ) {
 		double tau = impulse_response[i].second;
+		arma::cx_double p = 
+			{impulse_response[i].first.real, impulse_response[i].first.imag};
 
 		//Each impulse is a very narrow Gaussian pulse
 		for( int j = 0; j < N; j++ ) {
-			output[j] += exp( -1.0 * pow(( j*T_s - tau ), 2.0) 
+			output[j] += p*exp( -1.0 * pow(( j*T_s - tau ), 2.0) 
 							  / pow(impulse_width*T_s, 2.0) );
 		}
 	}

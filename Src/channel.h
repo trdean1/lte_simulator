@@ -10,6 +10,15 @@
 
 #define _USE_MATH_DEFINES
 
+struct lsp {
+	double pathloss;
+	double shadow;
+	double K;
+	double DS;
+	double ASA;
+	double ASD;
+};
+
 class channel {
 	public:
 		channel( node*, node*, params* sysp );
@@ -27,6 +36,11 @@ class channel {
 		double get_DS() { return DS; }
 		double get_ASA() { return ASA; }
 		double get_ASD() { return ASD; }
+
+		lsp get_current_lsp ();
+		lsp get_last_lsp ();
+
+		void set_current_lsp( lsp );
 
 		std::vector<double> get_delays() { return delays; }
 		std::vector<double> get_scaled_delays() { return scaled_delays; }

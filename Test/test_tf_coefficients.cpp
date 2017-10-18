@@ -63,15 +63,18 @@ int main()
 		c.update_lsp_local();
 		c.update_ssp();
 		c.compute_impulse_response( 0 );
-		arma::cx_vec h = c.compute_coefficients( 0 );
+		for( int j = 0; j < n_elements; j++ ) {
+			arma::cx_vec h = c.compute_coefficients( j );
+			printf("Element %d\n", j);
+			print_coefficients( stdout, h );
+		}
 		//print_delays( stdout, c, i == 0 );
 		//print_powers( stdout, c, i == 0 );
 		//print_aoa( stdout, c);
 		//print_aod( stdout, c );
-		//for( int j = 0; j < n_elements; j++ ) {
-		//	printf("Element %d:\n", j);
-		//	print_impulse_response( stdout, c, j );
-		//}
-		print_coefficients( stdout, h );
+		for( int j = 0; j < n_elements; j++ ) {
+			printf("Element %d:\n", j);
+			print_impulse_response( stdout, c, j );
+		}
 	}
 }

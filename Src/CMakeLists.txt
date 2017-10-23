@@ -5,7 +5,8 @@ add_library (Src SHARED
 		path.cpp 
 		map.cpp
 		channel.cpp
-		tf_channel.cpp)
+		tf_channel.cpp
+		zak_channel.cpp)
 
 target_link_libraries(Src -larmadillo)
 

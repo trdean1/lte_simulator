@@ -8,6 +8,9 @@ struct params {
 	double samp_per_symb; //FFT size = samp_per_symb * N
 	double impulse_width; //This is approximately the HWHM of an impulse in samples
 
+	double nu_resolution;
+	double tau_resolution;
+
 	double x_max;
 	double y_max;
 

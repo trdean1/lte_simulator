@@ -8,6 +8,8 @@
 #include <chrono>
 #include <algorithm>
 
+#pragma once
+
 #define _USE_MATH_DEFINES
 
 struct lsp {

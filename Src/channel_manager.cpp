@@ -1,12 +1,10 @@
 #include "channel_manager.h"
 
-void
 channel_manager::channel_manager( )
 {
 
 }
 
-void
 channel_manager::~channel_manager()
 {
 	for( channel *c : channels ) 
@@ -14,10 +12,10 @@ channel_manager::~channel_manager()
 }
 
 void
-channel_manager::update( double t )
+channel_manager::update_channels( double t )
 {
 	for( channel* c : channels ) {
-		c->update_lsp_locat( t );
+		c->update_lsp_local( t );
 		c->update_ssp( );	
 	}
 }
@@ -25,5 +23,5 @@ channel_manager::update( double t )
 double 
 channel_manager::get_loss( int rx_index )
 {
-	return c[rx_index]->get_total_loss();
+	return channels[rx_index]->get_total_loss();
 }

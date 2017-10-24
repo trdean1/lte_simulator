@@ -3,6 +3,8 @@
 
 #include <armadillo>
 
+#pragma once
+
 //Complex_num is coefficient, double is delay relative to smallest cluster delay
 typedef std::pair<fast_alg::complex_num, double> impulse_pair;
 

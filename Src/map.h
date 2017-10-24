@@ -2,6 +2,10 @@
 #include "base_station.h"
 #include "path.h"
 #include "params.h"
+#include "channel.h"
+#include "channel_manager.h"
+#include "zak_channel_manager.h"
+#include "tf_channel_manager.h"
 
 #include <unordered_map>
 #include <vector>
@@ -14,7 +18,7 @@ class map {
 	public:
 		map( params* d_sysp );
 		
-		//~map();
+		~map();
 
 		void add_ue( user_equipment );
 		void add_ue( double, double, double, double );
@@ -28,7 +32,7 @@ class map {
 		base_station* get_bs() { return &bs; }
 
 	private:
-		//void create_cm();
+		void create_cm();
 
 		void init_static( double, double, uint32_t,
 		  	 uint32_t n_bs_antenna, double theta, 
@@ -43,7 +47,7 @@ class map {
 		base_station bs;
 		std::vector<path> paths;
 
-		//channel_manager *cm;
+		channel_manager *cm;
 
 		//Tells which path is assigned to each ue. 
 		//path_map[i] = j means that ue_list[i] is assigned to paths[j]

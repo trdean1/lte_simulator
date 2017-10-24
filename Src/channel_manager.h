@@ -1,19 +1,16 @@
 #include "channel.h"
-#include "user_equipment.h"
-#include "base_station.h"
-#include "params.h"
 
-class channel_manager {
+#pragma once
+
+class channel_manager{
 	public:
-		channel_manager( std::vector<user_equipment>*, base_station*, params* );
+		channel_manager();
+		virtual ~channel_manager();
 
-		void update( double t );
+		void update_channels( double t );
+		double get_loss( int rx_index );
 
-	private:
-		void update_channel_lsp( double t );
-		void apply_spatial_consistancy( double t );
-		void update_channel_ssp( double t );
-		void update_channel_coefficients( double t );
-
-		double last_update_time;
+	protected:
+		params* sysp;
+		std::vector<channel *> channels;
 };

@@ -1,5 +1,24 @@
 #include "zak_channel.h"
 
+size_t hash_zak( const zak_component& z )
+{
+	size_t out = 5381;
+    out += 33 * (z.delay / 1e-9) + 1;
+	out += 33 * (z.doppler / 1e-5 ) + 1;
+	out += 33 * (z.amplitude / 1e-5 ) + 1;
+	out += 33 * (z.phase / 1e-5 ) + 1;
+	return out;
+}
+
+bool operator== (const zak_component& a, const zak_component& b)
+{
+	size_t ha = hash_zak( a ); 
+
+	size_t hb = hash_zak( b ); 
+
+	return ha == hb;
+}
+
 /** Gives impulse response in the zak domain based on Winner II 
  * channel model.  Channel response is a complex constant times
  * and exponential giving doppler values and a delta function giving

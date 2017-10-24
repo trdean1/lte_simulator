@@ -65,7 +65,7 @@ map::init_mobile( double x, double y, uint32_t n_ue,
 	y_dim = y;
 }
 
-/*
+
 map::~map() 
 {
 	delete cm;
@@ -79,7 +79,7 @@ map::create_cm()
 	else
 		cm = new zak_channel_manager( get_bs(), get_ue_list(), sysp );
 }
-*/
+
 
 void 
 map::add_ue( user_equipment ue ) {

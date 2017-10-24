@@ -35,6 +35,7 @@ class channel {
 		double get_DS() { return DS; }
 		double get_ASA() { return ASA; }
 		double get_ASD() { return ASD; }
+		double get_total_loss();
 
 		lsp get_current_lsp ();
 		lsp get_last_lsp ();

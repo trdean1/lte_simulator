@@ -81,15 +81,16 @@ int main()
 {
 	//base_station bs (100, 100, 4, 0, 0.1);
 	//user_equipment ue (30, 30, 0, 0);
-	int n_ue = 50;
-	map m (500, 500, n_ue, 4, 0, 0.1);
+	//int n_ue = 50;
+	//map m (500, 500, n_ue, 4, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
-	sysp.x_max = 200;
-	sysp.y_max = 200;
+	sysp.x_max = 500;
+	sysp.y_max = 500;
 	sysp.is_static = true;
-	sysp.n_users = 1;
+	sysp.is_tf_channel = true;
+	sysp.n_users = 50;
 	sysp.n_bs_antennas = 4;
 	sysp.array_theta = 0;
 	sysp.array_delta = 0.1;
@@ -98,9 +99,11 @@ int main()
 	sysp.v_sigma = 0;
 	sysp.v_cluster_sigma = 0;
 
+	map m ( &sysp );
+
 	base_station* bs = m.get_bs();
 	std::vector<user_equipment*> ues = m.get_ue_list();
-	for( int i = 0; i < n_ue; i++ ) {
+	for( int i = 0; i < sysp.n_users; i++ ) {
 		channel c ( ues[i], bs, &sysp );
 		c.update_lsp_local();
 		c.update_ssp();

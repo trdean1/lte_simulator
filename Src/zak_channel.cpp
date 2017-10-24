@@ -209,6 +209,8 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 	return merged_Zs;	
 }
 
+//This coherently sums all Zak components that lie inside delta_tau and
+//delta_nu.  This is the coefficient that each bin will see when blind decoding
 fast_alg::complex_num
 zak_channel::get_coefficient( int element_index, double delta_tau, double delta_nu )
 {
@@ -232,6 +234,7 @@ zak_channel::get_coefficient( int element_index, double delta_tau, double delta_
 	return out;
 }
 
+//This returns the amount of energy that is outsude of delta_tau and delta_nu
 double
 zak_channel::get_isi( int element_index, double delta_tau, double delta_nu )
 {

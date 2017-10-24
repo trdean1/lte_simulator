@@ -16,6 +16,7 @@ class tf_channel : public channel {
 		void compute_impulse_response( double t );
 
 		arma::cx_vec compute_coefficients( int element_index );
+		double get_isi( int element_index, double cp_len );
 	private:
 		static bool impulse_comp( impulse_pair, impulse_pair );
 		arma::cx_vec sample_impulse_response( int, double, double, double );

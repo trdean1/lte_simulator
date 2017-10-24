@@ -103,6 +103,12 @@ channel::update_ssp()
 	compute_cluster_doppler();
 }
 
+double
+channel::get_total_loss()
+{
+	return pathloss + shadow_dB;
+}
+
 //Determine whether or not the link is LoS based on Table 7.4.2-1
 void
 channel::determine_LoS()

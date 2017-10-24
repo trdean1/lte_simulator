@@ -1,9 +1,27 @@
 #include "map.h"
 
+map::map( params* d_sysp )
+ 	: bs( d_sysp->x_max / 2.0, 
+		  d_sysp->y_max / 2.0, 
+		  d_sysp->n_bs_antennas, 
+		  d_sysp->array_theta, 
+		  d_sysp->array_delta )	
+{
+	sysp = d_sysp;
+
+	if( sysp->is_static )
+		init_static( sysp->x_max, sysp->y_max, sysp->n_users, sysp->n_bs_antennas,
+					 sysp->array_theta, sysp->array_delta );
+	else
+		init_mobile( sysp->x_max, sysp->y_max, sysp->n_users,
+   					 sysp->num_paths, sysp->v_mu, sysp->v_sigma,
+					 sysp->n_bs_antennas, sysp->array_theta, sysp->array_delta );
+}
+
 //Generate static map
-map::map( double x, double y, uint32_t n_ue,
+void
+map::init_static( double x, double y, uint32_t n_ue,
 		  uint32_t n_bs_antenna, double theta, double spacing)
- 	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )	
 {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	generator.seed( seed );
@@ -18,10 +36,10 @@ map::map( double x, double y, uint32_t n_ue,
 	y_dim = y;
 }
 
-map::map( double x, double y, uint32_t n_ue, 
+void
+map::init_mobile( double x, double y, uint32_t n_ue, 
 		  uint32_t n_paths, double v_mu, double v_sigma,
 	      uint32_t n_bs_antenna, double theta, double spacing )
-	: bs( x / 2.0, y / 2.0, n_bs_antenna, theta, spacing )
 {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	generator.seed( seed );
@@ -46,6 +64,22 @@ map::map( double x, double y, uint32_t n_ue,
 	x_dim = x;
 	y_dim = y;
 }
+
+/*
+map::~map() 
+{
+	delete cm;
+}
+
+void
+map::create_cm()
+{
+	if( sysp->is_tf_channel )
+		cm = new tf_channel_manager( get_bs(), get_ue_list(), sysp );
+	else
+		cm = new zak_channel_manager( get_bs(), get_ue_list(), sysp );
+}
+*/
 
 void 
 map::add_ue( user_equipment ue ) {

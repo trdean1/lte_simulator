@@ -1,0 +1,35 @@
+#include "zak_channel_manager.h"
+
+zak_channel_manager::zak_channel_manager( base_station* bs, 
+										  std::vector<user_equipment*> ues,
+										  params* sysp ) 
+{
+	for( user_equipment* ue : ues ) {
+		zak_channel* z = new zak_channel( bs, ue, sysp );
+		channels.push_back( z );
+	}
+}
+
+fast_alg::complex_num
+zak_channel_manager::get_coefficients( int rx_index, int tx_index ) 
+{
+	return c[rx_index]->get_coefficient( tx_index, sysp->delta_tau, sysp->delta_nu );
+}
+
+double
+zak_channel_manager::first_order_isi( int rx_index, int tx_index )
+{
+	return c[rx_index]->get_isi( tx_index, sysp->delta_tau, sysp->delta_nu );
+}
+
+double
+zak_channel_manager::higher_order_isi( int rx_index, int tx_index )
+{
+	return c[rx_index]->get_isi( tx_index, 2*sysp->delta_tau, 2*sysp->delta_nu );
+}
+
+std::vector<zak_component> 
+zak_channel_manager::get_full_impulse_response( int rx_index, int tx_index )
+{
+	return c[rx_index]->get_zak_response( int tx_index );
+}

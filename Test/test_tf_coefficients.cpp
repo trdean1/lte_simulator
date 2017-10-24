@@ -31,9 +31,9 @@ int main()
 {
 	//base_station bs (100, 100, 4, 0, 0.1);
 	//user_equipment ue (30, 30, 0, 0);
-	int n_ue = 1;
-	int n_elements = 4;
-	map m (500, 500, n_ue, n_elements, 0, 0.1);
+	//int n_ue = 1;
+	//int n_elements = 4;
+	//map m (500, 500, n_ue, n_elements, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
@@ -42,10 +42,9 @@ int main()
 	sysp.N = 16;
 	sysp.samp_per_symb = 8;
 	sysp.impulse_width = 0.5;
-	
 
-	sysp.x_max = 200;
-	sysp.y_max = 200;
+	sysp.x_max = 500;
+	sysp.y_max = 500;
 	sysp.is_static = true;
 	sysp.n_users = 1;
 	sysp.n_bs_antennas = 4;
@@ -55,6 +54,11 @@ int main()
 	sysp.v_mu = 0;
 	sysp.v_sigma = 0;
 	sysp.v_cluster_sigma = 0;
+
+	map m ( &sysp );
+
+	int n_ue = sysp.n_users;
+	int n_elements = sysp.n_bs_antennas;
 
 	base_station* bs = m.get_bs();
 	std::vector<user_equipment*> ues = m.get_ue_list();

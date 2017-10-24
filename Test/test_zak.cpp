@@ -23,9 +23,9 @@ int main()
 {
 	//base_station bs (100, 100, 4, 0, 0.1);
 	//user_equipment ue (30, 30, 0, 0);
-	int n_ue = 1;
-	int n_elements = 4;
-	map m (500, 500, n_ue, n_elements, 1, 10, 5, 0, 0.1);
+	//int n_ue = 1;
+	//int n_elements = 4;
+	//map m (500, 500, n_ue, n_elements, 1, 10, 5, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
@@ -37,28 +37,31 @@ int main()
 
 	sysp.tau_resolution = 1e-7;
 	sysp.nu_resolution = 10;
+	sysp.delta_tau = 1e-6;
+	sysp.delta_nu = 100;
 
-	sysp.x_max = 200;
-	sysp.y_max = 200;
+	sysp.x_max = 500;
+	sysp.y_max = 500;
 	sysp.is_static = false;
 	sysp.n_users = 1;
 	sysp.n_bs_antennas = 4;
 	sysp.array_theta = 0;
 	sysp.array_delta = 0.1;
 	sysp.num_paths = 1;
-	sysp.v_mu = 0;
-	sysp.v_sigma = 0;
+	sysp.v_mu = 10;
+	sysp.v_sigma = 3;
 	sysp.v_cluster_sigma = 0;
+	map m ( &sysp );
 
 	base_station* bs = m.get_bs();
 	std::vector<user_equipment*> ues = m.get_ue_list();
-	for( int i = 0; i < n_ue; i++ ) {
+	for( int i = 0; i < sysp.n_users; i++ ) {
 		zak_channel c ( ues[i], bs, &sysp );
 		c.update_lsp_local();
 		c.update_ssp();
 		c.compute_impulse_response( 0 );
 		std::vector<zak_component> z = c.get_zak_response( 0 );
-		for( int j = 0; j < n_elements; j++ ) {
+		for( int j = 0; j < sysp.n_bs_antennas; j++ ) {
 		//	arma::cx_vec h = c.compute_coefficients( j );
 			printf("Element %d\n", j);
 			print_zak_response( stdout, c, j );
@@ -74,12 +77,12 @@ int main()
 	}
 
 	printf("\n\n");
-	for( int i = 0; i < n_ue; i++ ) {
+	for( int i = 0; i < sysp.n_users; i++ ) {
 		zak_channel c ( ues[i], bs, &sysp );
 		c.update_lsp_local();
 		c.update_ssp();
 		c.compute_impulse_response( 0 );
-		for( int j = 0; j < n_elements; j++ ) {
+		for( int j = 0; j < sysp.n_bs_antennas; j++ ) {
 			fast_alg::complex_num cj = c.get_coefficient( j, 1e-6, 100 );
 			double isi = c.get_isi( j, 1e-6, 100 );
 			double isi_2 = c.get_isi( j, 2e-6, 200 );

@@ -204,3 +204,25 @@ tf_channel::sample_impulse_response( int element_index, double T_s,
 
 	return output;
 }
+
+/** This simply determines the amount of power that lies outside of one cp
+ * length.  This is the amount of ISI that will remain after CP removal.  We can
+ * approximate this as a first order effect -- i.e. that all the power just
+ * spills over into the next symbol.  A perfectly reasonable model since each 
+ * symbol is drawn i.i.d.
+ *
+ */
+double 
+tf_channel::get_isi( int element_index, double cp_len )
+{
+
+	double oor_power = 0;
+
+	for( impulse_pair p : impulse_response_per_element[element_index] ) {
+		if( p.second > cp_len ) 
+			oor_power += sqrt( p.first.real*p.first.real + p.first.imag*p.first.imag );
+		
+	}
+
+	return oor_power;
+}

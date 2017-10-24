@@ -9,8 +9,6 @@ struct zak_component {
 	double phase;
 	double delay;
 	double doppler;
-
-
 };
 
 size_t hash_zak( const zak_component& z )
@@ -25,17 +23,9 @@ size_t hash_zak( const zak_component& z )
 
 bool operator== (const zak_component& a, const zak_component& b)
 {
-	size_t ha = 5381;
-	ha += 33 * (a.delay / 1e-9) + 1;
-	ha += 33 * (a.doppler / 1e-5 ) + 1;
-	ha += 33 * (a.amplitude / 1e-5 ) + 1;
-	ha += 33 * (a.phase / 1e-5 ) + 1;
+	size_t ha = hash_zak( a ); 
 
-	size_t hb = 5381;
-	hb += 33 * (b.delay / 1e-9) + 1;
-	hb += 33 * (b.doppler / 1e-5 ) + 1;
-	hb += 33 * (b.amplitude / 1e-5 ) + 1;
-	hb += 33 * (b.phase / 1e-5 ) + 1;
+	size_t hb = hash_zak( b ); 
 
 	return ha == hb;
 }

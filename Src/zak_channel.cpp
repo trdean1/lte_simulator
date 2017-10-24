@@ -1,6 +1,11 @@
 #include "zak_channel.h"
 
-/** t is ignored.  We include it here to maintain the interface
+/** Gives impulse response in the zak domain based on Winner II 
+ * channel model.  Channel response is a complex constant times
+ * and exponential giving doppler values and a delta function giving
+ * delay values 
+ *
+ * t is ignored.  We include it here to maintain the interface
  * defined by channel
  *
  */
@@ -110,6 +115,10 @@ zak_channel::compute_impulse_response( double t )
 
 }
 
+/** Combines components that are close together in both delay and doppler domain
+ * (considers \ell_\infty norm out of ease of implementation).  Close elements
+ * are summed together coherently.  This is just an N^2 greedy algorithm
+ */
 std::vector<zak_component>
 zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs, 
 										 double nu_res,
@@ -117,9 +126,12 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 {
 	std::vector<zak_component> merged_Zs;
 
+	//First step is to assign components to be grouped together.  This is stored
+	//in the following data structure. -1 means it hasn't been assigned yet.
 	std::unordered_map<zak_component, int, decltype(&hash_zak)> 
 			group_assignment (0, hash_zak);
 
+	//Set all to unassigned
 	for( auto z : all_Zs )
 		group_assignment[z] = -1;	
 
@@ -128,8 +140,12 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 		if( group_assignment[z] != -1 )
 			continue;
 
+		//This component will be grouped this round, we need to now look for
+		//matching components
 		group_assignment[z] = next_group;
 		bool found_assignment = false;
+
+		//Check the \ell_\infty distance for all components
 		for( auto z_i : all_Zs ) {
 			if( group_assignment[z_i] != -1 )
 				continue;
@@ -142,19 +158,7 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 			} 
 		}
 
-		//If we found anything, we need to make a second pass
-		if( found_assignment ) {
-			for( auto z_i : all_Zs ) {
-				if( group_assignment[z_i] != -1 )
-					continue; 
 
-				if( ( fabs( z.delay - z_i.delay ) < tau_res ) &&
-					( fabs( z.doppler - z_i.doppler ) < nu_res ) ) { 
-					//Add to group
-					group_assignment[z_i] = next_group;
-				} 
-			}
-		}	
 
 		//Find the elements in the newest cluster
 		std::vector<zak_component> group;
@@ -163,9 +167,27 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 				group.push_back( it->first );
 		}
 
-		//Merge cluster
 		zak_component cluster = group[0];
 
+		//If we found anything, we need to make a second pass
+		if( found_assignment ) {
+			for( auto z_i : group ) {
+				for( auto z_j : all_Zs ) {
+					if( group_assignment[z_j] != -1 || 
+						group_assignment[z_j] == next_group )
+						continue; 
+	
+					if( ( fabs( z_j.delay - z_i.delay ) < tau_res ) &&
+						( fabs( z_j.doppler - z_i.doppler ) < nu_res ) ) { 
+						//Add to group
+						group_assignment[z_j] = next_group;
+						group.push_back( z_j );
+					} 
+				}
+			}	
+		}
+
+		//Merge cluster
 		if ( group.size() > 1 ) {
 			for( int i = 1; i < group.size(); i++ ) {
 				//Sum coherently

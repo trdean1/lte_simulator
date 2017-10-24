@@ -25,7 +25,7 @@ int main()
 	//user_equipment ue (30, 30, 0, 0);
 	int n_ue = 1;
 	int n_elements = 4;
-	map m (500, 500, n_ue, n_elements, 1, 50, 5, 0, 0.1);
+	map m (500, 500, n_ue, n_elements, 1, 20, 5, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
@@ -36,7 +36,7 @@ int main()
 	sysp.impulse_width = 0.5;
 
 	sysp.tau_resolution = 1e-7;
-	sysp.nu_resolution = 5;
+	sysp.nu_resolution = 10;
 
 	sysp.x_max = 200;
 	sysp.y_max = 200;

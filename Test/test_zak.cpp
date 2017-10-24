@@ -25,7 +25,7 @@ int main()
 	//user_equipment ue (30, 30, 0, 0);
 	int n_ue = 1;
 	int n_elements = 4;
-	map m (500, 500, n_ue, n_elements, 1, 20, 5, 0, 0.1);
+	map m (500, 500, n_ue, n_elements, 1, 10, 5, 0, 0.1);
 
 	params sysp;
 	sysp.f_c = 5e9;
@@ -71,5 +71,19 @@ int main()
 		//	printf("Element %d:\n", j);
 		//	print_impulse_response( stdout, c, j );
 		//}
+	}
+
+	printf("\n\n");
+	for( int i = 0; i < n_ue; i++ ) {
+		zak_channel c ( ues[i], bs, &sysp );
+		c.update_lsp_local();
+		c.update_ssp();
+		c.compute_impulse_response( 0 );
+		for( int j = 0; j < n_elements; j++ ) {
+			fast_alg::complex_num cj = c.get_coefficient( j, 1e-6, 100 );
+			double isi = c.get_isi( j, 1e-6, 100 );
+			double isi_2 = c.get_isi( j, 2e-6, 200 );
+			printf("Element %d: %f + i %f (%f out of range, %f out of adj bins)\n", j, cj.real, cj.imag, isi, isi_2);
+		}
 	}
 }

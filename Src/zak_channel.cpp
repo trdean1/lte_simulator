@@ -208,3 +208,53 @@ zak_channel::merge_ambiguous_components( std::vector<zak_component> all_Zs,
 
 	return merged_Zs;	
 }
+
+fast_alg::complex_num
+zak_channel::get_coefficient( int element_index, double delta_tau, double delta_nu )
+{
+	std::vector<zak_component> in_range;
+
+	for( auto z : zak_response_per_element[element_index] ) {
+		if( z.delay < delta_tau && fabs(z.doppler) < delta_nu ) {
+			in_range.push_back( z );
+		}
+	}	
+
+	fast_alg::complex_num out;
+	out.real = 0;
+	out.imag = 0;
+
+	for( auto z : in_range ) {
+		out.real += z.amplitude * fast_alg::cheb7_cos( degtorad * z.phase );
+		out.imag += z.amplitude * fast_alg::cheb7_sin( degtorad * z.phase );
+	}
+
+	return out;
+}
+
+double
+zak_channel::get_isi( int element_index, double delta_tau, double delta_nu )
+{
+	std::vector<zak_component> in_range;
+
+	for( auto z : zak_response_per_element[element_index] ) {
+		if( z.delay > delta_tau && fabs(z.doppler) > delta_nu ) {
+			in_range.push_back( z );
+		}
+	}	
+
+	fast_alg::complex_num out;
+	out.real = 0;
+	out.imag = 0;
+
+	//sum incoherently
+	double isi = 0;
+	for( auto z : in_range ) {
+		fast_alg::complex_num out; out.real = 0; out.imag = 0;
+		out.real += z.amplitude * fast_alg::cheb7_cos( degtorad * z.phase );
+		out.imag += z.amplitude * fast_alg::cheb7_sin( degtorad * z.phase );
+		isi += sqrt( out.real*out.real + out.imag*out.imag );
+	}
+	
+	return isi;
+}

@@ -11,6 +11,16 @@ zak_channel_manager::zak_channel_manager( base_station* bs,
 	}
 }
 
+void
+zak_channel_manager::update_channels( double t )
+{
+	channel_manager::update_channels( t );
+	for( channel* c : channels ) {
+		zak_channel* z = static_cast<zak_channel*>(c);
+		z->compute_impulse_response();
+	}
+}	
+
 fast_alg::complex_num
 zak_channel_manager::get_coefficients( int rx_index, int tx_index ) 
 {

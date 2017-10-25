@@ -9,8 +9,9 @@ add_library (Src SHARED
 		zak_channel.cpp
 		channel_manager.cpp
 		tf_channel_manager.cpp
-		zak_channel_manager.cpp)
+		zak_channel_manager.cpp
+		sysconfig.cpp)
 
-target_link_libraries(Src -larmadillo)
+target_link_libraries(Src -larmadillo -lconfig++)
 
 target_include_directories (Src PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

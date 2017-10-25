@@ -24,8 +24,9 @@ class map {
 		void add_ue( double, double, double, double );
 		void set_bs( base_station );
 
-		void update_locations( double );
-
+		void update( double );	//calls the two funcitons below
+		void update_locations( double ); //updates all ue locations
+		void update_channels( double ); //updates all channels 
 		void print_locations();
 
 		std::vector<user_equipment*> get_ue_list( );

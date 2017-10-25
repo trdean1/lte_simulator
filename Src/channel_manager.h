@@ -7,7 +7,7 @@ class channel_manager{
 		channel_manager();
 		virtual ~channel_manager();
 
-		void update_channels( double t );
+		virtual void update_channels( double t );
 		double get_loss( int rx_index );
 
 	protected:

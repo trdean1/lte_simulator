@@ -16,6 +16,8 @@ map::map( params* d_sysp )
 		init_mobile( sysp->x_max, sysp->y_max, sysp->n_users,
    					 sysp->num_paths, sysp->v_mu, sysp->v_sigma,
 					 sysp->n_bs_antennas, sysp->array_theta, sysp->array_delta );
+
+	create_cm();
 }
 
 //Generate static map
@@ -106,10 +108,17 @@ map::get_ue_list()
 	return out;
 }
 
+void
+map::update( double time_ms )
+{
+	update_locations( time_ms );
+	update_channels( time_ms );
+}
+
 void 
 map::update_locations( double time_ms )
 {
-	//If it is a static map, there are not paths
+	//If it is a static map, there are no paths
 	if ( paths.empty() )
 		return;
 
@@ -128,6 +137,12 @@ map::update_locations( double time_ms )
 			ue_list[i].set_location( p_0.first, p_0.second );
 		}
 	}
+}
+
+void
+map::update_channels( double t )
+{
+	cm->update_channels( t );
 }
 
 void

@@ -10,6 +10,16 @@ tf_channel_manager::tf_channel_manager( base_station* bs,
 	}
 }
 
+void
+tf_channel_manager::update_channels( double t )
+{
+	channel_manager::update_channels( t );
+	for( channel* c : channels ) {
+		tf_channel* tf = static_cast<tf_channel*>( c );
+		tf->compute_impulse_response( t );
+	}	
+}
+
 arma::cx_vec
 tf_channel_manager::get_coefficients( int rx_index, int tx_index ) 
 {

@@ -15,6 +15,7 @@ struct params {
 
 	double delta_tau;		//2D grid spacing in Zak domain
 	double delta_nu;		//2D grid spacing in Zak domain
+	double zak_aspect;     
 
 	double x_max;
 	double y_max;

@@ -13,6 +13,8 @@ class tf_channel_manager : public channel_manager {
 		tf_channel_manager(  base_station* bs, 
 						     std::vector<user_equipment*> ues, 
 							 params* sysp );
+
+		void update_channels( double t );
 		double first_order_isi( int rx_index, int tx_index );
 		double higher_order_isi( int rx_index, int tx_index );
 		arma::cx_vec get_coefficients( int rx_index, int tx_index );

@@ -4,7 +4,8 @@ struct params {
 	double f_c; //carrier frequency
 	bool is_tf_channel;
 	double f_N; //subcarrier spacing
-	double N; //Number of subcarriers
+	double N; //Number of subcarriers or size of Zak transform
+	int block_len; 	//Symbols per OFDM block
 	double samp_per_symb; //FFT size = samp_per_symb * N
 	double impulse_width; //This is approximately the HWHM of an impulse in samples
 
@@ -16,6 +17,10 @@ struct params {
 	double delta_tau;		//2D grid spacing in Zak domain
 	double delta_nu;		//2D grid spacing in Zak domain
 	double zak_aspect;     
+
+	int modulation_order;	//i.e. 2 means QPSK, 64 means 64-QAM
+	double tx_pow;		//In dBW
+	double rx_noise;		//In dBW
 
 	double x_max;
 	double y_max;

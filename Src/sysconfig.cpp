@@ -38,6 +38,8 @@ sysconfig::param_from_file()
 			sysp.samp_per_symb = 8;
 		if( !conf.lookupValue( "impulse_width", sysp.impulse_width ) )
 			sysp.impulse_width = 0.5;
+		if( !conf.lookupValue( "block_len", sysp.block_len ) )
+			sysp.block_len = 256;
 	} else {
 		if( !conf.lookupValue( "N", sysp.N ) )
 			sysp.N = 16;
@@ -61,6 +63,10 @@ sysconfig::param_from_file()
 		sysp.n_users = 4;
 	if( !conf.lookupValue( "n_bs_antennas", sysp.n_bs_antennas ) )
 		sysp.n_bs_antennas = 1;
+	if( !conf.lookupValue( "array_theta", sysp.array_theta ) )
+		sysp.array_theta = 0;
+	if( !conf.lookupValue( "array_delta", sysp.array_delta ) )
+		sysp.array_delta = 0.1;
 
 	try {
 		sysp.is_static = conf.lookup("is_static");
@@ -78,6 +84,13 @@ sysconfig::param_from_file()
 		if( !conf.lookupValue( "v_cluster_sigma", sysp.v_cluster_sigma ) )
 			sysp.v_cluster_sigma = 0;
 	}
+
+	if (!conf.lookupValue( "modulation_order", sysp.modulation_order ) )
+		sysp.modulation_order = 2;
+	if (!conf.lookupValue( "tx_pow", sysp.tx_pow ) )
+		sysp.tx_pow = 0;
+	if (!conf.lookupValue( "rx_noise", sysp.rx_noise ) )
+		sysp.rx_noise = -60;
 
 	return sysp;	
 }

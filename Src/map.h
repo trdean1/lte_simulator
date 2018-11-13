@@ -31,6 +31,7 @@ class map {
 
 		std::vector<user_equipment*> get_ue_list( );
 		base_station* get_bs() { return &bs; }
+		channel_manager* get_cm() { return cm; }
 
 	private:
 		void create_cm();

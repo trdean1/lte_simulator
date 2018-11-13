@@ -4,10 +4,13 @@ tf_channel_manager::tf_channel_manager( base_station* bs,
 										  std::vector<user_equipment*> ues,
 										  params* d_sysp ) 
 {
+	sysp = d_sysp;
 	for( user_equipment* ue : ues ) {
-		tf_channel* z = new tf_channel( bs, ue, sysp );
+		tf_channel* z = new tf_channel( ue, bs, sysp );
 		channels.push_back( z );
 	}
+
+	p = new phy( sysp );
 }
 
 void

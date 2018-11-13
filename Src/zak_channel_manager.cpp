@@ -6,9 +6,11 @@ zak_channel_manager::zak_channel_manager( base_station* bs,
 {
 	sysp = d_sysp;
 	for( user_equipment* ue : ues ) {
-		zak_channel* z = new zak_channel( bs, ue, sysp );
+		zak_channel* z = new zak_channel( ue, bs, sysp );
 		channels.push_back( z );
 	}
+
+	p = new phy( sysp );
 }
 
 void

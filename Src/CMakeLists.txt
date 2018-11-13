@@ -10,6 +10,7 @@ add_library (Src SHARED
 		channel_manager.cpp
 		tf_channel_manager.cpp
 		zak_channel_manager.cpp
+		phy.cpp
 		sysconfig.cpp)
 
 target_link_libraries(Src -larmadillo -lconfig++)
